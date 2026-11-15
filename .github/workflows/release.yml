@@ -35,6 +35,7 @@ jobs:
             bundle: nsis
             bundle_dir: nsis
             target: ""
+            target_dir: target
             target_args: ""
             extension: exe
           - platform: macos-apple-silicon
@@ -42,6 +43,7 @@ jobs:
             bundle: dmg
             bundle_dir: dmg
             target: aarch64-apple-darwin
+            target_dir: target/aarch64-apple-darwin
             target_args: --target aarch64-apple-darwin
             extension: dmg
           - platform: macos-intel
@@ -49,6 +51,7 @@ jobs:
             bundle: dmg
             bundle_dir: dmg
             target: x86_64-apple-darwin
+            target_dir: target/x86_64-apple-darwin
             target_args: --target x86_64-apple-darwin
             extension: dmg
     needs: verify
@@ -70,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gameverse-${{ matrix.platform }}
-          path: src-tauri/target/release/bundle/${{ matrix.bundle_dir }}/*.${{ matrix.extension }}
+          path: src-tauri/${{ matrix.target_dir }}/release/bundle/${{ matrix.bundle_dir }}/*.${{ matrix.extension }}
           if-no-files-found: error
           retention-days: 7
 

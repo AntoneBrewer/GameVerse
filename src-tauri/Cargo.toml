@@ -1,6 +1,6 @@
 [package]
 name = "gameverse"
-version = "0.1.3"
+version = "0.1.4"
 description = "A private, universal gaming library and playtime tracker."
 authors = ["GameVerse"]
 edition = "2021"
