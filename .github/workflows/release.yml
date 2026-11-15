@@ -1,0 +1,124 @@
+name: Build and publish GameVerse
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm run build:web
+
+  desktop:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-latest
+            bundle: nsis
+            bundle_dir: nsis
+          - platform: macos
+            runner: macos-latest
+            bundle: dmg
+            bundle_dir: dmg
+    needs: verify
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - name: Build installer
+        run: npm run tauri -- build --bundles ${{ matrix.bundle }}
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: gameverse-${{ matrix.platform }}
+          path: src-tauri/target/release/bundle/${{ matrix.bundle_dir }}/*
+          if-no-files-found: error
+          retention-days: 7
+
+  android:
+    name: Build Android APK and AAB
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - name: Install Android NDK
+        shell: bash
+        run: |
+          sdkmanager "ndk;27.0.12077973"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> "$GITHUB_ENV"
+      - run: npm ci
+      - name: Initialize Android project
+        run: npm run tauri -- android init --ci
+      - name: Build installable Android test APK
+        run: npm run tauri -- android build --ci --target aarch64 --debug --apk
+      - name: Build Android App Bundle
+        run: npm run tauri -- android build --ci --target aarch64 --aab
+      - name: Upload Android packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: gameverse-android
+          path: |
+            src-tauri/gen/android/app/build/outputs/apk/**/debug/*.apk
+            src-tauri/gen/android/app/build/outputs/bundle/**/*.aab
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [desktop, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: Publish installers and packages
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: GameVerse ${{ github.ref_name }}
+          generate_release_notes: true
+          body: |
+            Windows and macOS installers and Android packages are attached below.
+
+            **Signing:** These initial desktop installers are unsigned and not notarized, so Windows SmartScreen and macOS Gatekeeper may show warnings. The Android APK is a debug-signed test build for sideloading; it is not a production release and cannot be updated with future builds signed by a different debug key. The Android App Bundle is unsigned and needs a protected app-signing key before Play Store publishing.
+          files: release-assets/**/*
+          fail_on_unmatched_files: true

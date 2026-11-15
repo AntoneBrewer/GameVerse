@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111313" />
+    <meta name="description" content="A private, personal home for your gaming library." />
+    <title>GameVerse — Your gaming universe</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" data-page="dashboard" aria-label="GameVerse dashboard">
+          <span class="brand-mark">G<span>V</span></span>
+          <span class="brand-name">gameverse</span>
+        </a>
+        <div class="sidebar-label">YOUR SPACE</div>
+        <nav class="primary-nav" aria-label="Main navigation">
+          <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span>Dashboard</button>
+          <button class="nav-item" data-page="library"><span class="nav-icon">▦</span>My library<span class="nav-count" id="nav-game-count">0</span></button>
+          <button class="nav-item" data-page="playing"><span class="nav-icon">◉</span>Currently playing</button>
+          <button class="nav-item" data-page="backlog"><span class="nav-icon">◷</span>Backlog</button>
+          <button class="nav-item" data-page="achievements"><span class="nav-icon">✳</span>Achievements</button>
+          <button class="nav-item" data-page="wishlist"><span class="nav-icon">♡</span>Wishlist</button>
+          <button class="nav-item" data-page="collections"><span class="nav-icon">▤</span>Collections</button>
+        </nav>
+        <div class="sidebar-label sidebar-label-spaced">INSIGHTS</div>
+        <nav class="primary-nav" aria-label="Insights">
+          <button class="nav-item" data-page="analytics"><span class="nav-icon">▥</span>Analytics</button>
+          <button class="nav-item" data-page="connections"><span class="nav-icon">⤴</span>Connections</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="privacy-card">
+            <div class="privacy-icon">◈</div>
+            <div><strong>Your library, your data</strong><span>Saved privately on this device.</span></div>
+          </div>
+          <button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span>Settings</button>
+          <div class="profile-mini">
+            <div class="avatar" id="profile-avatar">G</div>
+            <div class="profile-copy"><strong id="profile-name">Gamer</strong><span>Personal library</span></div>
+            <button class="icon-button profile-settings" data-page="settings" aria-label="Profile settings">···</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <button class="icon-button menu-button" id="menu-button" aria-label="Open navigation">☰</button>
+          <div class="breadcrumbs"><span>YOUR UNIVERSE</span><b>/</b><strong id="breadcrumb-current">Dashboard</strong></div>
+          <div class="topbar-actions">
+            <label class="search-box" for="global-search">
+              <span class="search-icon">⌕</span>
+              <input id="global-search" type="search" placeholder="Search your library..." autocomplete="off" />
+              <kbd>⌘ K</kbd>
+            </label>
+            <button class="icon-button theme-toggle" id="theme-toggle" aria-label="Toggle light theme" title="Toggle light theme">☼</button>
+            <button class="avatar avatar-top" id="profile-shortcut" data-page="settings" aria-label="Profile settings">G</button>
+          </div>
+        </header>
+        <div id="storage-warning" class="storage-warning" hidden></div>
+        <section class="page-content" id="page-content" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="modal-backdrop" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div id="modal-content"></div>
+      </section>
+    </div>
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <input id="import-file" type="file" accept=".json,.csv,application/json,text/csv" hidden />
+    <script src="src/core.js"></script>
+    <script src="src/storage.js"></script>
+    <script src="src/app.js"></script>
+  </body>
+</html>
