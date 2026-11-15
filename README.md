@@ -48,7 +48,7 @@ npm run build:web
 npm run tauri -- android build --target aarch64 --apk --aab
 ```
 
-Pushing a `v*` version tag runs the Windows, macOS, and Android builds and publishes their outputs to a GitHub Release. The Android APK is a debug-signed test build for sideloading; it is not suitable for production updates. The Android AAB needs a protected signing key before Play Store publishing. Windows installers and macOS disk images are unsigned and may show operating-system security warnings.
+Pushing a `v*` version tag runs Windows, Apple Silicon macOS, Intel macOS, and Android builds and publishes their outputs to a GitHub Release. The Android APK is a debug-signed test build for sideloading; it is not suitable for production updates. The Android AAB needs a protected signing key before Play Store publishing. Windows installers and macOS disk images are unsigned and may show operating-system security warnings.
 
 Run the frontend tests and Rust persistence tests with:
 

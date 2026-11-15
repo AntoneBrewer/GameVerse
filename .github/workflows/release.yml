@@ -34,10 +34,23 @@ jobs:
             runner: windows-latest
             bundle: nsis
             bundle_dir: nsis
-          - platform: macos
+            target: ""
+            target_args: ""
+            extension: exe
+          - platform: macos-apple-silicon
             runner: macos-latest
             bundle: dmg
             bundle_dir: dmg
+            target: aarch64-apple-darwin
+            target_args: --target aarch64-apple-darwin
+            extension: dmg
+          - platform: macos-intel
+            runner: macos-latest
+            bundle: dmg
+            bundle_dir: dmg
+            target: x86_64-apple-darwin
+            target_args: --target x86_64-apple-darwin
+            extension: dmg
     needs: verify
     runs-on: ${{ matrix.runner }}
     steps:
@@ -48,13 +61,16 @@ jobs:
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
+      - name: Install Rust target
+        if: matrix.target != ''
+        run: rustup target add ${{ matrix.target }}
       - name: Build installer
-        run: npm run tauri -- build --bundles ${{ matrix.bundle }}
+        run: npm run tauri -- build ${{ matrix.target_args }} --bundles ${{ matrix.bundle }}
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: gameverse-${{ matrix.platform }}
-          path: src-tauri/target/release/bundle/${{ matrix.bundle_dir }}/*
+          path: src-tauri/target/release/bundle/${{ matrix.bundle_dir }}/*.${{ matrix.extension }}
           if-no-files-found: error
           retention-days: 7
 
@@ -120,7 +136,7 @@ jobs:
           name: GameVerse ${{ github.ref_name }}
           generate_release_notes: true
           body: |
-            Windows and macOS installers and Android packages are attached below.
+            Windows and Apple Silicon/Intel macOS installers and Android packages are attached below.
 
             **Signing:** These initial desktop installers are unsigned and not notarized, so Windows SmartScreen and macOS Gatekeeper may show warnings. The Android APK is a debug-signed test build for sideloading; it is not a production release and cannot be updated with future builds signed by a different debug key. The Android App Bundle is unsigned and needs a protected app-signing key before Play Store publishing.
           files: release-assets/**/*
